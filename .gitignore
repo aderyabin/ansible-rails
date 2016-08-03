@@ -1,0 +1,5 @@
+playbook.retry
+.vagrant
+ssh_keys
+vars/defaults.yml
+hosts

@@ -1,0 +1,16 @@
+- name: 'Check config existance'
+  command: 'test -f /etc/nginx/sites-enabled/{{ app_name }}.conf'
+  register: 'nginx_config_copied'
+  ignore_errors: yes
+
+- name: 'Createdir'
+  shell: 'rm /etc/nginx/sites-enabled/default; mkdir -p etc/nginx/sites-enabled/'
+  when: 'nginx_config_copied|failed'
+
+- name: 'Copy config file'
+  template: 'src=nginx.conf.j2 dest=/etc/nginx/sites-enabled/{{ app_name }}.conf owner=root group=root mode=0644'
+  when: 'nginx_config_copied|failed'
+
+- name: 'Restart service'
+  service: name=nginx state=restarted
+  when: 'nginx_config_copied|failed'

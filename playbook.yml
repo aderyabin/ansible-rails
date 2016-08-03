@@ -1,0 +1,35 @@
+---
+# - hosts: digitalocean
+
+#   become: yes
+#   become_method: sudo
+
+#   vars_files:
+#     - vars/defaults.yml
+
+#   roles:
+#     - initial
+#     - database
+#     - ruby
+
+#   handlers:
+#   - name: Restart ssh
+#     action: service name=ssh state=restarted
+
+
+- hosts: vagrant
+
+  become: yes
+
+  vars_files:
+    - vars/defaults.yml
+
+  roles:
+    - initial
+    - database
+    - ruby
+
+  handlers:
+  - name: Restart ssh
+    action: service name=ssh state=restarted
+

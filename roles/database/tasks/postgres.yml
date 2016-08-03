@@ -1,0 +1,41 @@
+- name: Add PostgreSQL repo key
+  apt_key: url=http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc
+
+- name: Add PostgreSQL repo
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main'
+
+- name: Upgrade APT to the lastest packages
+  action: apt upgrade=safe
+
+- name: Install PostgreSQL dependencies
+  action: apt pkg={{item}} state=latest
+  with_items:
+    - postgresql-common
+    - python-pycurl
+    - python-psycopg2
+
+
+
+- name: Install PostgreSQL
+  apt: pkg=postgresql-{{ postgres_version }} state=latest update_cache=true
+
+- name: Copy valid pg_hba.conf
+  template: src=pg_hba.conf.j2 dest=/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf
+
+- name: Copy valid postgresql.conf
+  template: src=postgresql.conf.j2 dest=/etc/postgresql/{{ postgres_version }}/main/postgresql.conf
+
+- name: Restart PostgreSQL
+  command: service postgresql restart
+
+- name: create the postgresql user for application
+  become: yes
+  become_user: "postgres"
+  vars:
+    ansible_ssh_pipelining: true
+  postgresql_user: name={{ deploy_user }}
+
+# - name: create the postgresql database for application
+#   postgresql_db: name=app_{{app_name}} owner=deploy state=present
+#   sudo: yes
+#   sudo_user: postgres

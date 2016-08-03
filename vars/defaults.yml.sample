@@ -1,0 +1,22 @@
+- root_password: ''
+
+- deploy_user: 'deploy'
+- home: '/home/{{ deploy_user }}'
+- deploy_password: ''
+- app_name: "site"
+
+- authorized_users:
+
+- postgres_version: 9.5
+
+- ruby_version: 2.3.1
+- rbenv_root: '{{ home }}/.rbenv'
+
+- dependencies:
+  - 'build-essential'
+  - 'libssl-dev'
+  - 'libyaml-dev'
+  - 'libreadline6-dev'
+  - 'git'
+  - 'imagemagick'
+  - 'htop'

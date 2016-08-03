@@ -1,0 +1,40 @@
+- name: Change root password
+  user: name=root password="{{ root_password |password_hash('sha512') }}"
+
+- name: Update APT package cache
+  action: apt update_cache=yes
+
+- name: Upgrade APT to the lastest packages
+  action: apt upgrade=safe
+
+- name: 'Install dependencies'
+  action: 'apt pkg={{ item }}'
+  with_items: '{{ dependencies }}'
+
+- name: Add deployment user
+  user: name={{ deploy_user }} shell=/bin/bash password={{ deploy_password |password_hash('sha512') }}
+
+- name: Add authorized keys for deploy user
+  authorized_key: user={{ deploy_user }}
+                  key="{{ lookup('file', '../../../ssh_keys/' + item + '.pub') }}"
+  with_items: '{{authorized_users}}'
+
+- name: Add deploy user to sudoers
+  lineinfile: dest=/etc/sudoers
+              regexp="deploy ALL"
+              line="{{ deploy_user }} ALL=(ALL) ALL"
+              state=present
+
+- name: Disallow password authentication
+  lineinfile: dest=/etc/ssh/sshd_config
+              regexp="^PasswordAuthentication"
+              line="PasswordAuthentication no"
+              state=present
+  notify: Restart ssh
+
+- name: Disallow root SSH access
+  lineinfile: dest=/etc/ssh/sshd_config
+              regexp="^PermitRootLogin"
+              line="PermitRootLogin no"
+              state=present
+  notify: Restart ssh
